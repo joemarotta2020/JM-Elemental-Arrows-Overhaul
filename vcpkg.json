@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+  "name": "jm-elemental-arrows",
+  "version-string": "0.1.0",
+  "description": "Native soul-gem instance support for JM Elemental Arrows Overhaul on Skyrim SE 1.5.97",
+  "builtin-baseline": "fc3f61366102c1f0d4547c06d03c523bb18c13a7",
+  "dependencies": [
+    "rapidcsv",
+    "spdlog"
+  ]
+}
