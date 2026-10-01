@@ -1,0 +1,23 @@
+# Visual Studio / CMake
+.vs/
+build/
+out/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+*.vcxproj
+*.vcxproj.filters
+*.sln
+
+# vcpkg
+vcpkg_installed/
+
+# binaries
+*.dll
+*.pdb
+*.lib
+*.exp
+
+# local packaging
+artifact/
+dist/
