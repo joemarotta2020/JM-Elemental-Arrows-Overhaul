@@ -1,0 +1,73 @@
+name: Build JM Elemental Arrows SE
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-se:
+    name: Skyrim SE 1.5.97
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up MSVC x64
+        uses: TheMrMilchmann/setup-msvc-dev@v4.0.0
+        with:
+          arch: x64
+
+      - name: Prepare vcpkg
+        shell: pwsh
+        run: |
+          C:\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+          C:\vcpkg\vcpkg.exe version
+
+      - name: Configure release
+        shell: pwsh
+        run: |
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake `
+            -DVCPKG_TARGET_TRIPLET=x64-windows-static-md
+
+      - name: Build release
+        shell: pwsh
+        run: |
+          cmake --build build --config Release --target JM_ElementalArrows -- /m
+
+      - name: Stage build artifact
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path artifact\SKSE\Plugins | Out-Null
+          New-Item -ItemType Directory -Force -Path artifact\Source\Scripts | Out-Null
+
+          $dll = Get-ChildItem -Path build -Recurse -File -Filter 'JM_ElementalArrows.dll' | Select-Object -First 1
+          if (-not $dll) { throw 'JM_ElementalArrows.dll was not produced.' }
+          Copy-Item $dll.FullName artifact\SKSE\Plugins\JM_ElementalArrows.dll
+
+          $pdb = Get-ChildItem -Path build -Recurse -File -Filter 'JM_ElementalArrows.pdb' | Select-Object -First 1
+          if ($pdb) { Copy-Item $pdb.FullName artifact\SKSE\Plugins\JM_ElementalArrows.pdb }
+
+          Copy-Item papyrus\JM_EA_Native.psc artifact\Source\Scripts\JM_EA_Native.psc
+
+          "Source commit: $env:GITHUB_SHA" | Set-Content artifact\BUILD_INFO.txt
+          "Runtime guard: Skyrim SE 1.5.97 only" | Add-Content artifact\BUILD_INFO.txt
+          "Phase 1: instance-aware Soul Trap gem inspection/consumption" | Add-Content artifact\BUILD_INFO.txt
+          Get-ChildItem artifact -Recurse
+
+      - name: Upload Skyrim SE build
+        uses: actions/upload-artifact@v4
+        with:
+          name: JM-Elemental-Arrows-SE-1.5.97
+          path: artifact/
+          if-no-files-found: error
+          retention-days: 30
