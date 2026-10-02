@@ -39,6 +39,20 @@ jobs:
         shell: pwsh
         run: cmake --build build --config Release --target JM_ElementalArrows -- /m
 
+      - name: Verify SKSE plugin exports
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $dll = Get-ChildItem -Path build -Recurse -File -Filter 'JM_ElementalArrows.dll' | Select-Object -First 1
+          if (-not $dll) { throw 'JM_ElementalArrows.dll was not produced.' }
+          $exports = (& dumpbin /nologo /exports $dll.FullName) -join "`n"
+          $exports | Write-Host
+          foreach ($required in @('SKSEPlugin_Load', 'SKSEPlugin_Query', 'SKSEPlugin_Version')) {
+            if ($exports -notmatch [regex]::Escape($required)) {
+              throw "Missing required SKSE export: $required"
+            }
+          }
+
       - name: Stage production candidate
         shell: pwsh
         run: |

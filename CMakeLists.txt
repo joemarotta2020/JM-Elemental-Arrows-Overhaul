@@ -27,21 +27,16 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(CommonLibSSE)
 
-add_library(JM_ElementalArrows SHARED
-    src/main.cpp
+add_commonlibsse_plugin(JM_ElementalArrows
+    NAME "JM_ElementalArrows"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBLE_RUNTIMES "1.5.97"
+    SOURCES
+        src/main.cpp
 )
 
 target_precompile_headers(JM_ElementalArrows PRIVATE src/PCH.h)
 target_include_directories(JM_ElementalArrows PRIVATE src)
 target_compile_definitions(JM_ElementalArrows PRIVATE NOMINMAX WIN32_LEAN_AND_MEAN)
-
-target_link_libraries(JM_ElementalArrows
-    PRIVATE
-        CommonLibSSE::CommonLibSSE
-)
-
-set_target_properties(JM_ElementalArrows PROPERTIES
-    OUTPUT_NAME "JM_ElementalArrows"
-)
 
 install(TARGETS JM_ElementalArrows DESTINATION SKSE/Plugins)
