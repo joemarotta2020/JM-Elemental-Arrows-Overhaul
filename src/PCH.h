@@ -13,9 +13,11 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
 #include <spdlog/sinks/basic_file_sink.h>
 
+using namespace std::literals;
 namespace logger = SKSE::log;
